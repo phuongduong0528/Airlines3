@@ -10,18 +10,28 @@ namespace Airlines.Business.Manager
     public class FindRoute
     {
         Session3Entities session3 = new Session3Entities();
-        int counter;
+        int counter;             //USE FOR IMPLEMENT ARRAY NAME
+        int totalnode;           //TOTAL NUMBER OF NODE
+        List<string> single_result;
+        public List<List<string>> RouteResult { get; }
+        public DateTime Start_Date { get; set; }
 
-        List<DateTime>[,] STime;
-        List<DateTime>[,] FTime;
+        //MAIN
+        public List<DateTime>[,] STime;
+        public List<DateTime>[,] FTime;
         string[] name;
         int[] trace;
-        List<DateTime>[] trace_d;
-        string[] path;
+        DateTime[,] trace_date;
+        bool[] path;
+
 
         public FindRoute()
         {
             session3 = new Session3Entities();
+            counter = 0;
+            totalnode = session3.Airports.Count();
+            single_result = new List<string>();
+            RouteResult = new List<List<string>>();
         }
 
         #region Helper
@@ -34,7 +44,7 @@ namespace Airlines.Business.Manager
             return false;
         }
 
-        List<DateTime> getListStart(string name1,string name2)
+        List<DateTime> GetListStart(string name1,string name2)
         {
             List<DateTime> result = new List<DateTime>();
             foreach (Schedule s in 
@@ -53,7 +63,7 @@ namespace Airlines.Business.Manager
             return result;
         }
 
-        List<DateTime> getListFinish(string name1, string name2)
+        List<DateTime> GetListFinish(string name1, string name2)
         {
             List<DateTime> result = new List<DateTime>();
             foreach (Schedule s in
@@ -71,42 +81,103 @@ namespace Airlines.Business.Manager
             }
             return result;
         }
+
+        void GetFlightNumber(string from,string to,DateTime time)
+        {
+
+        }
         #endregion
 
         public void Inputdata()
         {
-            int countnode = session3.Airports.Count();
-            STime = new List<DateTime>[countnode, countnode];
-            FTime = new List<DateTime>[countnode, countnode];
-            name = new string[countnode];
-            
-            counter = 0;
-            foreach (Airport a in session3.Airports)
+            STime = new List<DateTime>[totalnode, totalnode];
+            FTime = new List<DateTime>[totalnode, totalnode];
+            name = new string[totalnode];
+            trace = new int[totalnode];
+            trace_date = new DateTime[totalnode,totalnode];
+            path = new bool[totalnode];
+
+            foreach (Airport a in session3.Airports)    //KHOI TAO MANG NAME
             {
                 name[counter] = a.IATACode;
                 counter++;
             }
-            
-            for (int i = 0; i < countnode; i++)
+            counter = 0;
+
+            for (int i = 0; i < totalnode; i++)
             {
-                for(int j = 0; j < countnode; j++)
+                for(int j = 0; j < totalnode; j++)
                 {
                     if (Is_Connected(name[i], name[j]))
                     {
-                        STime[i, j] = getListStart(name[i], name[j]);
-                        FTime[i, j] = getListFinish(name[i], name[j]);
+                        STime[i, j] = GetListStart(name[i], name[j]);
+                        FTime[i, j] = GetListFinish(name[i], name[j]);
                     }
                 }
             }
-            
-
         }
 
-        //bool tryRoute(int i)
-        //{
+        bool CheckPath(int i,int j)
+        {
+            int index;
+            if (counter == 0 && STime[i, j] != null)
+            {
+                trace[j] = i;
+                index = 0;
+                foreach (DateTime date in STime[i, j])
+                {
+                    if (date >= Start_Date)
+                    {
+                        trace_date[i, j] = FTime[i, j][index];
+                        counter++;
+                        return true;
+                    }
+                    index++;
+                }
+                return false;
+            }
+            if (STime[i, j] != null)
+            {
+                index = 0;
+                foreach (DateTime date in STime[i, j])
+                {
+                    if (trace_date[trace[i], i] < date && 
+                        trace_date[trace[i], i] != DateTime.MinValue)
+                    {
+                        trace[j] = i;
+                        trace_date[i,j] = FTime[i, j][index];
+                        return true;
+                    }
+                    index++;
+                }
+            }
+            return false;
+        }
 
-        //}
-
-
+        public void FindFlightRoute(int checking,int finish_node)
+        {
+            if (!path[checking])
+            {
+                if (checking == finish_node)
+                {
+                    single_result.Add(checking.ToString());
+                    RouteResult.Add(new List<string>(single_result));
+                    path[checking] = false;
+                    single_result.RemoveAt(single_result.Count()-1);
+                    return;
+                }
+                path[checking] = true;
+                single_result.Add(checking.ToString());
+                for (int i = 0; i < totalnode; i++)
+                {
+                    if (CheckPath(checking,i))
+                    {
+                        FindFlightRoute(i, finish_node);
+                    }
+                }
+                path[checking] = false;
+                single_result.RemoveAt(single_result.Count()-1);
+            }
+        }
     }
 }

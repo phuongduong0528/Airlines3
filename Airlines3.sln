@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airlines.Services", "Airlin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airlines.Test", "Airlines.Test\Airlines.Test.csproj", "{18A91CFD-D12B-4D65-8D8B-7240E2E0A9D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Airlines.FormApplication", "Airlines.FormApplication\Airlines.FormApplication.csproj", "{F823B905-4456-427C-917E-090F36B2616F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{18A91CFD-D12B-4D65-8D8B-7240E2E0A9D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18A91CFD-D12B-4D65-8D8B-7240E2E0A9D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18A91CFD-D12B-4D65-8D8B-7240E2E0A9D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F823B905-4456-427C-917E-090F36B2616F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F823B905-4456-427C-917E-090F36B2616F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F823B905-4456-427C-917E-090F36B2616F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F823B905-4456-427C-917E-090F36B2616F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
