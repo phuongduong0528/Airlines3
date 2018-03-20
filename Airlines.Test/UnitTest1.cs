@@ -19,8 +19,8 @@ namespace Airlines.Test
             List<DateTime> list = find.STime[0, 1];
             List<DateTime> list2 = find.FTime[0, 1];
 
-            find.FindFlightRoute(3, 5);
-            List<List<string>> allroute = find.RouteResult;
+            find.FindFlightRoute(5, 1);
+            List<string> allroute = find.Result;
 
         }
     }

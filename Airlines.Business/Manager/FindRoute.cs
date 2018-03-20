@@ -12,16 +12,18 @@ namespace Airlines.Business.Manager
         Session3Entities session3 = new Session3Entities();
         int counter;             //USE FOR IMPLEMENT ARRAY NAME
         int totalnode;           //TOTAL NUMBER OF NODE
-        List<string> single_result;
-        public List<List<string>> RouteResult { get; }
+        List<int> sr;
+        public List<string> Result { get; }
+        public string result_temp;
         public DateTime Start_Date { get; set; }
 
         //MAIN
         public List<DateTime>[,] STime;
         public List<DateTime>[,] FTime;
-        string[] name;
+        int[] name;
         int[] trace;
         DateTime[,] trace_date;
+        DateTime[,] trace_sdate;
         bool[] path;
 
 
@@ -30,26 +32,31 @@ namespace Airlines.Business.Manager
             session3 = new Session3Entities();
             counter = 0;
             totalnode = session3.Airports.Count();
-            single_result = new List<string>();
-            RouteResult = new List<List<string>>();
+            sr = new List<int>();
+            Result = new List<string>();
+            result_temp = "";
+            trace = new int[totalnode];
+            trace_date = new DateTime[totalnode, totalnode];
+            trace_sdate = new DateTime[totalnode,totalnode];
+            path = new bool[totalnode];
         }
 
         #region Helper
-        bool Is_Connected(string name1,string name2)
+        bool Is_Connected(int id1,int id2)
         {
-            int i = session3.Routes.Where(r=>r.Airport.IATACode.Equals(name1)
-                                        && r.Airport1.IATACode.Equals(name2)).Count();
+            int i = session3.Routes.Where(r => r.Airport.ID == id1
+                                        && r.Airport1.ID == id2).Count();
             if (i > 0)
                 return true;
             return false;
         }
 
-        List<DateTime> GetListStart(string name1,string name2)
+        List<DateTime> GetListStart(int id1,int id2)
         {
             List<DateTime> result = new List<DateTime>();
-            foreach (Schedule s in 
-                session3.Schedules.Where(s=>s.Route.Airport.IATACode.Equals(name1) 
-                && s.Route.Airport1.IATACode.Equals(name2)))
+            foreach (Schedule s in
+                session3.Schedules.Where(s => s.Route.Airport.ID == id1
+                && s.Route.Airport1.ID == id2))
             {
                 DateTime start = new DateTime(
                     s.Date.Year,
@@ -63,12 +70,12 @@ namespace Airlines.Business.Manager
             return result;
         }
 
-        List<DateTime> GetListFinish(string name1, string name2)
+        List<DateTime> GetListFinish(int id1, int id2)
         {
             List<DateTime> result = new List<DateTime>();
             foreach (Schedule s in
-                session3.Schedules.Where(s => s.Route.Airport.IATACode.Equals(name1)
-                && s.Route.Airport1.IATACode.Equals(name2)))
+                session3.Schedules.Where(s => s.Route.Airport.ID == id1
+                && s.Route.Airport1.ID == id2))
             {
                 DateTime finish = new DateTime(
                     s.Date.Year,
@@ -82,9 +89,12 @@ namespace Airlines.Business.Manager
             return result;
         }
 
-        void GetFlightNumber(string from,string to,DateTime time)
+        string GetFlightNumber(int from,int to,DateTime time)
         {
-
+            return session3.Schedules.FirstOrDefault(s => s.Route.Airport.ID == from &&
+                                                          s.Route.Airport1.ID == to &&
+                                                          s.Date.Equals(time.Date) &&
+                                                          s.Time.Equals(time.TimeOfDay)).FlightNumber;
         }
         #endregion
 
@@ -92,14 +102,12 @@ namespace Airlines.Business.Manager
         {
             STime = new List<DateTime>[totalnode, totalnode];
             FTime = new List<DateTime>[totalnode, totalnode];
-            name = new string[totalnode];
-            trace = new int[totalnode];
-            trace_date = new DateTime[totalnode,totalnode];
-            path = new bool[totalnode];
+            name = new int[totalnode];
+            
 
             foreach (Airport a in session3.Airports)    //KHOI TAO MANG NAME
             {
-                name[counter] = a.IATACode;
+                name[counter] = a.ID;
                 counter++;
             }
             counter = 0;
@@ -128,6 +136,7 @@ namespace Airlines.Business.Manager
                 {
                     if (date >= Start_Date)
                     {
+                        trace_sdate[i, j] = date;
                         trace_date[i, j] = FTime[i, j][index];
                         counter++;
                         return true;
@@ -145,6 +154,7 @@ namespace Airlines.Business.Manager
                         trace_date[trace[i], i] != DateTime.MinValue)
                     {
                         trace[j] = i;
+                        trace_sdate[i, j] = date;
                         trace_date[i,j] = FTime[i, j][index];
                         return true;
                     }
@@ -160,14 +170,21 @@ namespace Airlines.Business.Manager
             {
                 if (checking == finish_node)
                 {
-                    single_result.Add(checking.ToString());
-                    RouteResult.Add(new List<string>(single_result));
+                    sr.Add(checking);
+                    for (int i = 0; i < sr.Count-1; i++)
+                    {
+                        result_temp += $"[" +
+                            $"{GetFlightNumber(name[sr[i]], name[sr[i+1]], trace_sdate[sr[i], sr[i+1]])}" +
+                            $"] - ";
+                    }
+                    Result.Add(result_temp.Remove(result_temp.Length - 3));
+                    result_temp = "";
                     path[checking] = false;
-                    single_result.RemoveAt(single_result.Count()-1);
+                    sr.RemoveAt(sr.Count()-1);
                     return;
                 }
                 path[checking] = true;
-                single_result.Add(checking.ToString());
+                sr.Add(checking);
                 for (int i = 0; i < totalnode; i++)
                 {
                     if (CheckPath(checking,i))
@@ -176,7 +193,7 @@ namespace Airlines.Business.Manager
                     }
                 }
                 path[checking] = false;
-                single_result.RemoveAt(single_result.Count()-1);
+                sr.RemoveAt(sr.Count()-1);
             }
         }
     }
