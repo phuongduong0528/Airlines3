@@ -9,10 +9,9 @@ namespace Airlines.Business.Manager
 {
     interface IBookFlightManager
     {
-        List<Schedule> FindFlight(string from,string to,string cabintype,DateTime time,bool display);
-        int TotalSeats(int scheduleid, string cabintype);
+        List<string> FindFlight(string from,string to,DateTime time);
+        int TotalSeats(int scheduleid);
         int AvalibleSeats(int scheduleid, string cabintype);
-        int BookedSeats(int scheduleid, string cabintype);
-        bool ConfirmTicket();
+        int BookedSeats(int scheduleid);
     }
 }

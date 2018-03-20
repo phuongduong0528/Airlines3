@@ -12,15 +12,9 @@ namespace Airlines.Test
         public void TestMethod1()
         {
             FindRoute find = new FindRoute();
-            find.Inputdata();
-
-            find.Start_Date = new DateTime(2017, 9, 1);
-
-            List<DateTime> list = find.STime[0, 1];
-            List<DateTime> list2 = find.FTime[0, 1];
-
-            find.FindFlightRoute(5, 1);
-            List<string> allroute = find.Result;
+            find.CalculatePath(6, 2,new DateTime(2017,9,1));
+            List<string> result1 = find.GetResult_FN();
+            List<int[]> result2 = find.GetResult_SID();
 
         }
     }

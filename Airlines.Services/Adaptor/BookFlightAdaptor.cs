@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Airlines.Business.Repositories
+namespace Airlines.Services.Adaptor
 {
-    class TicketsRepository
+    class BookFlightAdaptor
     {
     }
 }

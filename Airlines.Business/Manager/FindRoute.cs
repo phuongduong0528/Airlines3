@@ -9,22 +9,24 @@ namespace Airlines.Business.Manager
 {
     public class FindRoute
     {
-        Session3Entities session3 = new Session3Entities();
-        int counter;             //USE FOR IMPLEMENT ARRAY NAME
-        int totalnode;           //TOTAL NUMBER OF NODE
-        List<int> sr;
-        public List<string> Result { get; }
-        public string result_temp;
+        private Session3Entities session3 = new Session3Entities();
+        private int counter;             //USE FOR IMPLEMENT ARRAY NAME
+        private int totalnode;           //TOTAL NUMBER OF NODE
         public DateTime Start_Date { get; set; }
+        private List<int> sr;
+        private string one_result_string;
+        private List<int> one_result_id;
+        private List<string> ResultString { get; }
+        private List<int[]> ResultID { get; }
 
         //MAIN
-        public List<DateTime>[,] STime;
-        public List<DateTime>[,] FTime;
-        int[] name;
-        int[] trace;
-        DateTime[,] trace_date;
-        DateTime[,] trace_sdate;
-        bool[] path;
+        private List<DateTime>[,] STime;
+        private List<DateTime>[,] FTime;
+        private int[] name;
+        private int[] trace;
+        private DateTime[,] trace_date;
+        private DateTime[,] trace_sdate;
+        private bool[] path;
 
 
         public FindRoute()
@@ -33,8 +35,10 @@ namespace Airlines.Business.Manager
             counter = 0;
             totalnode = session3.Airports.Count();
             sr = new List<int>();
-            Result = new List<string>();
-            result_temp = "";
+            one_result_string = "";
+            one_result_id = new List<int>();
+            ResultString = new List<string>();
+            ResultID = new List<int[]>();
             trace = new int[totalnode];
             trace_date = new DateTime[totalnode, totalnode];
             trace_sdate = new DateTime[totalnode,totalnode];
@@ -96,6 +100,14 @@ namespace Airlines.Business.Manager
                                                           s.Date.Equals(time.Date) &&
                                                           s.Time.Equals(time.TimeOfDay)).FlightNumber;
         }
+
+        int GetScheduleId(int from, int to, DateTime time)
+        {
+            return session3.Schedules.FirstOrDefault(s => s.Route.Airport.ID == from &&
+                                                          s.Route.Airport1.ID == to &&
+                                                          s.Date.Equals(time.Date) &&
+                                                          s.Time.Equals(time.TimeOfDay)).ID;
+        }
         #endregion
 
         public void Inputdata()
@@ -128,7 +140,7 @@ namespace Airlines.Business.Manager
         bool CheckPath(int i,int j)
         {
             int index;
-            if (counter == 0 && STime[i, j] != null)
+            if (trace[i] == -1 && STime[i, j] != null)
             {
                 trace[j] = i;
                 index = 0;
@@ -173,12 +185,15 @@ namespace Airlines.Business.Manager
                     sr.Add(checking);
                     for (int i = 0; i < sr.Count-1; i++)
                     {
-                        result_temp += $"[" +
+                        one_result_string += $"[" +
                             $"{GetFlightNumber(name[sr[i]], name[sr[i+1]], trace_sdate[sr[i], sr[i+1]])}" +
                             $"] - ";
+                        one_result_id.Add(GetScheduleId(name[sr[i]], name[sr[i + 1]], trace_sdate[sr[i], sr[i + 1]]));
                     }
-                    Result.Add(result_temp.Remove(result_temp.Length - 3));
-                    result_temp = "";
+                    ResultString.Add(one_result_string.Remove(one_result_string.Length - 3));
+                    ResultID.Add(one_result_id.ToArray());
+                    one_result_string = "";
+                    one_result_id.Clear();
                     path[checking] = false;
                     sr.RemoveAt(sr.Count()-1);
                     return;
@@ -195,6 +210,34 @@ namespace Airlines.Business.Manager
                 path[checking] = false;
                 sr.RemoveAt(sr.Count()-1);
             }
+        }
+
+        // ===================== GET RESULT ============================
+        public void CalculatePath(int from, int to, DateTime date)
+        {
+            int _from = 0;
+            int _to = 0;
+            Start_Date = date;
+            Inputdata();
+            for (int i = 0; i < name.Length; i++)
+            {
+                if (name[i] == from)
+                    _from = i;
+                if (name[i] == to)
+                    _to = i;
+            }
+            trace[_from] = -1;
+            FindFlightRoute(_from, _to);
+        }
+
+        public List<string> GetResult_FN()
+        {
+            return ResultString;
+        }
+
+        public List<int[]> GetResult_SID()
+        {
+            return ResultID;
         }
     }
 }
