@@ -10,10 +10,9 @@ namespace Airlines.Business.Manager
     public class FindRoute
     {
         private Session3Entities session3 = new Session3Entities();
-        private int counter;             //USE FOR IMPLEMENT ARRAY NAME
         private int totalnode;           //TOTAL NUMBER OF NODE
-        public DateTime Start_Date { get; set; }
-        private List<int> sr;
+        private DateTime Start_Date { get; set; }
+        private List<int> current_path;
         private string one_result_string;
         private List<int> one_result_id;
         private List<string> ResultString { get; }
@@ -32,9 +31,8 @@ namespace Airlines.Business.Manager
         public FindRoute()
         {
             session3 = new Session3Entities();
-            counter = 0;
             totalnode = session3.Airports.Count();
-            sr = new List<int>();
+            current_path = new List<int>();
             one_result_string = "";
             one_result_id = new List<int>();
             ResultString = new List<string>();
@@ -115,8 +113,8 @@ namespace Airlines.Business.Manager
             STime = new List<DateTime>[totalnode, totalnode];
             FTime = new List<DateTime>[totalnode, totalnode];
             name = new int[totalnode];
-            
 
+            int counter = 0;
             foreach (Airport a in session3.Airports)    //KHOI TAO MANG NAME
             {
                 name[counter] = a.ID;
@@ -140,7 +138,7 @@ namespace Airlines.Business.Manager
         bool CheckPath(int i,int j)
         {
             int index;
-            if (trace[i] == -1 && STime[i, j] != null)
+            if (trace[i] == -1 && STime[i, j] != null && !path[j])
             {
                 trace[j] = i;
                 index = 0;
@@ -150,14 +148,13 @@ namespace Airlines.Business.Manager
                     {
                         trace_sdate[i, j] = date;
                         trace_date[i, j] = FTime[i, j][index];
-                        counter++;
                         return true;
                     }
                     index++;
                 }
                 return false;
             }
-            if (STime[i, j] != null)
+            if (STime[i, j] != null && !path[j])
             {
                 index = 0;
                 foreach (DateTime date in STime[i, j])
@@ -182,24 +179,24 @@ namespace Airlines.Business.Manager
             {
                 if (checking == finish_node)
                 {
-                    sr.Add(checking);
-                    for (int i = 0; i < sr.Count-1; i++)
+                    current_path.Add(checking);
+                    for (int i = 0; i < current_path.Count-1; i++)
                     {
                         one_result_string += $"[" +
-                            $"{GetFlightNumber(name[sr[i]], name[sr[i+1]], trace_sdate[sr[i], sr[i+1]])}" +
+                            $"{GetFlightNumber(name[current_path[i]], name[current_path[i+1]], trace_sdate[current_path[i], current_path[i+1]])}" +
                             $"] - ";
-                        one_result_id.Add(GetScheduleId(name[sr[i]], name[sr[i + 1]], trace_sdate[sr[i], sr[i + 1]]));
+                        one_result_id.Add(GetScheduleId(name[current_path[i]], name[current_path[i + 1]], trace_sdate[current_path[i], current_path[i + 1]]));
                     }
                     ResultString.Add(one_result_string.Remove(one_result_string.Length - 3));
                     ResultID.Add(one_result_id.ToArray());
                     one_result_string = "";
                     one_result_id.Clear();
                     path[checking] = false;
-                    sr.RemoveAt(sr.Count()-1);
+                    current_path.RemoveAt(current_path.Count()-1);
                     return;
                 }
                 path[checking] = true;
-                sr.Add(checking);
+                current_path.Add(checking);
                 for (int i = 0; i < totalnode; i++)
                 {
                     if (CheckPath(checking,i))
@@ -208,7 +205,7 @@ namespace Airlines.Business.Manager
                     }
                 }
                 path[checking] = false;
-                sr.RemoveAt(sr.Count()-1);
+                current_path.RemoveAt(current_path.Count()-1);
             }
         }
 

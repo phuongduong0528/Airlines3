@@ -58,7 +58,9 @@
     <Compile Include="Dto\BookFlightDto.cs" />
     <Compile Include="Dto\TicketDto.cs" />
     <Compile Include="IBookFlightService.cs" />
+    <Compile Include="ITicketService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TicketService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -8,5 +8,6 @@ namespace Airlines.Services.Dto
 {
     class TicketDto
     {
+
     }
 }

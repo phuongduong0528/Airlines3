@@ -44,9 +44,30 @@ namespace Airlines.Business.Manager
                 session3.Tickets.Where(t => t.ScheduleID == scheduleid).Count();
         }
 
-        public List<string> FindFlight(string from, string to, DateTime time)
+        public List<int[]> FindFlight(string from, string to, DateTime time)
         {
-            throw new NotImplementedException();
+            try
+            {
+                int id_from = session3.Airports.Single(a => a.IATACode.Equals(from)).ID;
+                int id_to = session3.Airports.Single(a => a.IATACode.Equals(to)).ID;
+                FindRoute fr = new FindRoute();
+                fr.CalculatePath(id_from, id_to, time);
+                return fr.GetResult_SID();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public List<string> GetListAirport()
+        {
+            List<string> result = new List<string>();
+            foreach (Airport a in session3.Airports)
+            {
+                result.Add(a.IATACode);
+            }
+            return result;
         }
 
         public int TotalSeats(int scheduleid)

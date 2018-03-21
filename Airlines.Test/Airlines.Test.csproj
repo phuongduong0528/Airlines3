@@ -67,6 +67,14 @@
       <Project>{60f5fdab-a1a7-42f1-965a-46cd858af460}</Project>
       <Name>Airlines.Business</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Airlines.FormApplication\Airlines.FormApplication.csproj">
+      <Project>{f823b905-4456-427c-917e-090f36b2616f}</Project>
+      <Name>Airlines.FormApplication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Airlines.Services\Airlines.Services.csproj">
+      <Project>{37df4edc-7140-4363-9eb8-76ce76d31bab}</Project>
+      <Name>Airlines.Services</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
