@@ -44,10 +44,10 @@ namespace Airlines.Services.Adaptor
                 int last_id = id[id.Length - 1];
                 foreach (int i in id)
                 {
-                    flightnumber += $"[{session3.Schedules.SingleOrDefault(s => s.ID == i).FlightNumber}] -";
+                    flightnumber += $"[{session3.Schedules.SingleOrDefault(s => s.ID == i).FlightNumber}] - ";
                     price += Math.Ceiling(session3.Schedules.SingleOrDefault(s => s.ID == i).EconomyPrice * multiple);
                 }
-                flightnumber = flightnumber.Remove(flightnumber.Length - 2);
+                flightnumber = flightnumber.Remove(flightnumber.Length - 3);
                 BookFlightDto bookFlightDto = new BookFlightDto();
                 bookFlightDto.From = session3.Schedules.SingleOrDefault(s => s.ID == first_id).Route.Airport.IATACode;
                 bookFlightDto.To = session3.Schedules.SingleOrDefault(s => s.ID == last_id).Route.Airport1.IATACode;
@@ -65,14 +65,17 @@ namespace Airlines.Services.Adaptor
 
         public List<BookFlightDto> GetListBookFlightDto(List<int[]> routevalue, string cabintype)
         {
+            BookFlightDto temp = new BookFlightDto();
             try
             {
                 List<BookFlightDto> result = new List<BookFlightDto>();
-                foreach (int[] i in routevalue)
+                for (int i = 0; i < routevalue.Count; i++)
                 {
-                    result.Add(GetBookFlightDto(i, cabintype));
+                    temp = GetBookFlightDto(routevalue[i], cabintype);
+                    if (!result.Any(r=>r.Date == temp.Date && r.FlightNumber.Equals(temp.FlightNumber)))
+                        result.Add(temp);
                 }
-                return result.OrderBy(a=>a.Date).ToList();
+                return result.OrderBy(r=>r.Date).ToList();
             }
             catch (Exception)
             {

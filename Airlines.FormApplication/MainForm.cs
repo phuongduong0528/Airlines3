@@ -35,12 +35,15 @@ namespace Airlines.FormApplication
 
         async Task RefreshGridView()
         {
+            bookFlightDtos_outbound = new List<BookFlightDto>();
+            bookFlightDtos_return = new List<BookFlightDto>();
             bookFlightDtos_outbound = await
                 Program.Instance.Controller.FindFlight(
                     fromCbx.SelectedItem.ToString(),
                     toCbx.SelectedItem.ToString(),
                     outboundDtp.Value.ToString("dd/MM/yyyy",CultureInfo.InvariantCulture),
-                    cabintypeCbx.SelectedItem.ToString());
+                    cabintypeCbx.SelectedItem.ToString()
+                    );
             if (returnRbt.Checked)
             {
                 bookFlightDtos_return = await
@@ -48,14 +51,24 @@ namespace Airlines.FormApplication
                     toCbx.SelectedItem.ToString(),
                     fromCbx.SelectedItem.ToString(),
                     returnDtp.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    cabintypeCbx.SelectedItem.ToString());
+                    cabintypeCbx.SelectedItem.ToString()
+                    );
             }
         }
 
         void LoadGridView()
         {
-            outboundflightDgv.DataSource = bookFlightDtos_outbound;
-            returnflightDgv.DataSource = bookFlightDtos_return;
+            if(outboundChk.Checked)
+                outboundflightDgv.DataSource = bookFlightDtos_outbound;
+            else
+                outboundflightDgv.DataSource = bookFlightDtos_outbound
+                    .Where(bo=>bo.Date.Equals(outboundDtp.Value.Date.ToString("dd/MM/yyyy"))).ToList();
+            if (returnChk.Checked)
+                returnflightDgv.DataSource = bookFlightDtos_return;
+            else
+                returnflightDgv.DataSource = bookFlightDtos_return
+                    .Where(bo => bo.Date.Equals(returnDtp.Value.Date.ToString("dd/MM/yyyy"))).ToList();
+
         }
 
         private async void MainForm_Load(object sender, EventArgs e)

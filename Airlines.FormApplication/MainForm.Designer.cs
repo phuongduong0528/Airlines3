@@ -44,8 +44,8 @@
             this.fromCbx = new System.Windows.Forms.ComboBox();
             this.outboundflightDgv = new System.Windows.Forms.DataGridView();
             this.returnflightDgv = new System.Windows.Forms.DataGridView();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.outboundChk = new System.Windows.Forms.CheckBox();
+            this.returnChk = new System.Windows.Forms.CheckBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
@@ -55,6 +55,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.groupBox1.Controls.Add(this.applyBtn);
             this.groupBox1.Controls.Add(this.returnDtp);
             this.groupBox1.Controls.Add(this.outboundDtp);
@@ -90,7 +91,8 @@
             // 
             // returnDtp
             // 
-            this.returnDtp.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.returnDtp.CustomFormat = "dd/MM/yyyy";
+            this.returnDtp.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.returnDtp.Location = new System.Drawing.Point(533, 74);
             this.returnDtp.Name = "returnDtp";
             this.returnDtp.Size = new System.Drawing.Size(145, 26);
@@ -98,7 +100,8 @@
             // 
             // outboundDtp
             // 
-            this.outboundDtp.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.outboundDtp.CustomFormat = "dd/MM/yyyy";
+            this.outboundDtp.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.outboundDtp.Location = new System.Drawing.Point(317, 74);
             this.outboundDtp.Name = "outboundDtp";
             this.outboundDtp.Size = new System.Drawing.Size(145, 26);
@@ -203,6 +206,9 @@
             // 
             this.outboundflightDgv.AllowUserToAddRows = false;
             this.outboundflightDgv.AllowUserToDeleteRows = false;
+            this.outboundflightDgv.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.outboundflightDgv.BackgroundColor = System.Drawing.SystemColors.Control;
             this.outboundflightDgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.outboundflightDgv.Location = new System.Drawing.Point(9, 164);
@@ -215,6 +221,8 @@
             // 
             this.returnflightDgv.AllowUserToAddRows = false;
             this.returnflightDgv.AllowUserToDeleteRows = false;
+            this.returnflightDgv.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.returnflightDgv.BackgroundColor = System.Drawing.SystemColors.Control;
             this.returnflightDgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.returnflightDgv.Location = new System.Drawing.Point(12, 340);
@@ -223,25 +231,27 @@
             this.returnflightDgv.Size = new System.Drawing.Size(814, 139);
             this.returnflightDgv.TabIndex = 1;
             // 
-            // checkBox1
+            // outboundChk
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(549, 131);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(279, 24);
-            this.checkBox1.TabIndex = 2;
-            this.checkBox1.Text = "Display three days before and after";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.outboundChk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.outboundChk.AutoSize = true;
+            this.outboundChk.Location = new System.Drawing.Point(549, 131);
+            this.outboundChk.Name = "outboundChk";
+            this.outboundChk.Size = new System.Drawing.Size(279, 24);
+            this.outboundChk.TabIndex = 2;
+            this.outboundChk.Text = "Display three days before and after";
+            this.outboundChk.UseVisualStyleBackColor = true;
             // 
-            // checkBox2
+            // returnChk
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(546, 306);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(279, 24);
-            this.checkBox2.TabIndex = 2;
-            this.checkBox2.Text = "Display three days before and after";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.returnChk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.returnChk.AutoSize = true;
+            this.returnChk.Location = new System.Drawing.Point(546, 306);
+            this.returnChk.Name = "returnChk";
+            this.returnChk.Size = new System.Drawing.Size(279, 24);
+            this.returnChk.TabIndex = 2;
+            this.returnChk.Text = "Display three days before and after";
+            this.returnChk.UseVisualStyleBackColor = true;
             // 
             // label6
             // 
@@ -254,6 +264,7 @@
             // 
             // label7
             // 
+            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(12, 310);
             this.label7.Name = "label7";
@@ -268,8 +279,8 @@
             this.ClientSize = new System.Drawing.Size(840, 500);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.checkBox2);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.returnChk);
+            this.Controls.Add(this.outboundChk);
             this.Controls.Add(this.returnflightDgv);
             this.Controls.Add(this.outboundflightDgv);
             this.Controls.Add(this.groupBox1);
@@ -304,8 +315,8 @@
         private System.Windows.Forms.DateTimePicker outboundDtp;
         private System.Windows.Forms.DataGridView outboundflightDgv;
         private System.Windows.Forms.DataGridView returnflightDgv;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox outboundChk;
+        private System.Windows.Forms.CheckBox returnChk;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button applyBtn;
