@@ -44,19 +44,17 @@ namespace Airlines.Business.Manager
                 session3.Tickets.Where(t => t.ScheduleID == scheduleid).Count();
         }
 
-        public List<int[]> FindFlight(string from, string to, DateTime time)
+        public List<List<int>> FindFlight(string from, string to, DateTime time)
         {
             try
             {
-                List<int[]> result = new List<int[]>();
+                List<List<int>> result = new List<List<int>>();
                 int id_from = session3.Airports.Single(a => a.IATACode.Equals(from)).ID;
                 int id_to = session3.Airports.Single(a => a.IATACode.Equals(to)).ID;
                 FindRoute fr = new FindRoute();
-                for (int i = -3; i < 3; i++)      //SEARCH MULTIPLE DAYS
-                {
-                    fr.CalculatePath(id_from, id_to, time.AddDays(i));
-                    result.AddRange(fr.GetResult_SID());
-                }
+
+                result = fr.GetResultPaths(id_from, id_to, time.AddDays(-3), time.AddDays(3));
+
                 //SEARCH ONE DAYS
                 //fr.CalculatePath(id_from, id_to, time);
                 //result = fr.GetResult_SID();

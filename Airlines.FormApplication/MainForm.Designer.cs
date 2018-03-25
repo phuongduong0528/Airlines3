@@ -48,6 +48,11 @@
             this.returnChk = new System.Windows.Forms.CheckBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.statusLbl = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.confirmLbl = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.outboundflightDgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.returnflightDgv)).BeginInit();
@@ -56,6 +61,7 @@
             // groupBox1
             // 
             this.groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.groupBox1.Controls.Add(this.statusLbl);
             this.groupBox1.Controls.Add(this.applyBtn);
             this.groupBox1.Controls.Add(this.returnDtp);
             this.groupBox1.Controls.Add(this.outboundDtp);
@@ -81,7 +87,7 @@
             // applyBtn
             // 
             this.applyBtn.Enabled = false;
-            this.applyBtn.Location = new System.Drawing.Point(696, 72);
+            this.applyBtn.Location = new System.Drawing.Point(696, 23);
             this.applyBtn.Name = "applyBtn";
             this.applyBtn.Size = new System.Drawing.Size(111, 33);
             this.applyBtn.TabIndex = 5;
@@ -128,7 +134,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(572, 29);
+            this.label3.Location = new System.Drawing.Point(441, 29);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(86, 20);
             this.label3.TabIndex = 3;
@@ -137,7 +143,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(334, 29);
+            this.label2.Location = new System.Drawing.Point(248, 29);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(25, 20);
             this.label2.TabIndex = 3;
@@ -181,7 +187,7 @@
             "Economy",
             "Business",
             "First class"});
-            this.cabintypeCbx.Location = new System.Drawing.Point(664, 26);
+            this.cabintypeCbx.Location = new System.Drawing.Point(533, 26);
             this.cabintypeCbx.Name = "cabintypeCbx";
             this.cabintypeCbx.Size = new System.Drawing.Size(143, 28);
             this.cabintypeCbx.TabIndex = 0;
@@ -189,9 +195,9 @@
             // toCbx
             // 
             this.toCbx.FormattingEnabled = true;
-            this.toCbx.Location = new System.Drawing.Point(365, 26);
+            this.toCbx.Location = new System.Drawing.Point(279, 26);
             this.toCbx.Name = "toCbx";
-            this.toCbx.Size = new System.Drawing.Size(143, 28);
+            this.toCbx.Size = new System.Drawing.Size(145, 28);
             this.toCbx.TabIndex = 0;
             // 
             // fromCbx
@@ -211,10 +217,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.outboundflightDgv.BackgroundColor = System.Drawing.SystemColors.Control;
             this.outboundflightDgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.outboundflightDgv.Location = new System.Drawing.Point(9, 164);
+            this.outboundflightDgv.Location = new System.Drawing.Point(6, 171);
             this.outboundflightDgv.Name = "outboundflightDgv";
             this.outboundflightDgv.ReadOnly = true;
-            this.outboundflightDgv.Size = new System.Drawing.Size(814, 139);
+            this.outboundflightDgv.Size = new System.Drawing.Size(814, 153);
             this.outboundflightDgv.TabIndex = 1;
             // 
             // returnflightDgv
@@ -225,10 +231,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.returnflightDgv.BackgroundColor = System.Drawing.SystemColors.Control;
             this.returnflightDgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.returnflightDgv.Location = new System.Drawing.Point(12, 340);
+            this.returnflightDgv.Location = new System.Drawing.Point(9, 360);
             this.returnflightDgv.Name = "returnflightDgv";
             this.returnflightDgv.ReadOnly = true;
-            this.returnflightDgv.Size = new System.Drawing.Size(814, 139);
+            this.returnflightDgv.Size = new System.Drawing.Size(814, 138);
             this.returnflightDgv.TabIndex = 1;
             // 
             // outboundChk
@@ -241,17 +247,19 @@
             this.outboundChk.TabIndex = 2;
             this.outboundChk.Text = "Display three days before and after";
             this.outboundChk.UseVisualStyleBackColor = true;
+            this.outboundChk.CheckedChanged += new System.EventHandler(this.outboundChk_CheckedChanged);
             // 
             // returnChk
             // 
             this.returnChk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.returnChk.AutoSize = true;
-            this.returnChk.Location = new System.Drawing.Point(546, 306);
+            this.returnChk.Location = new System.Drawing.Point(541, 330);
             this.returnChk.Name = "returnChk";
             this.returnChk.Size = new System.Drawing.Size(279, 24);
             this.returnChk.TabIndex = 2;
             this.returnChk.Text = "Display three days before and after";
             this.returnChk.UseVisualStyleBackColor = true;
+            this.returnChk.CheckedChanged += new System.EventHandler(this.returnChk_CheckedChanged);
             // 
             // label6
             // 
@@ -266,17 +274,67 @@
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 310);
+            this.label7.Location = new System.Drawing.Point(8, 331);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(139, 20);
             this.label7.TabIndex = 3;
             this.label7.Text = "Return flight details";
+            this.label7.Click += new System.EventHandler(this.label7_Click);
+            // 
+            // statusLbl
+            // 
+            this.statusLbl.AutoSize = true;
+            this.statusLbl.ForeColor = System.Drawing.Color.Red;
+            this.statusLbl.Location = new System.Drawing.Point(716, 59);
+            this.statusLbl.Name = "statusLbl";
+            this.statusLbl.Size = new System.Drawing.Size(74, 20);
+            this.statusLbl.TabIndex = 4;
+            this.statusLbl.Text = "Loading...";
+            this.statusLbl.Visible = false;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(265, 511);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 26);
+            this.textBox1.TabIndex = 4;
+            // 
+            // confirmLbl
+            // 
+            this.confirmLbl.AutoSize = true;
+            this.confirmLbl.Location = new System.Drawing.Point(114, 514);
+            this.confirmLbl.Name = "confirmLbl";
+            this.confirmLbl.Size = new System.Drawing.Size(145, 20);
+            this.confirmLbl.TabIndex = 5;
+            this.confirmLbl.Text = "Confirm booking for";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(371, 514);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(85, 20);
+            this.label8.TabIndex = 6;
+            this.label8.Text = "Passengers";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(472, 508);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(132, 33);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "Book flight";
+            this.button1.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(840, 500);
+            this.ClientSize = new System.Drawing.Size(840, 549);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.confirmLbl);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.returnChk);
@@ -320,6 +378,11 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button applyBtn;
+        private System.Windows.Forms.Label statusLbl;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label confirmLbl;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button button1;
     }
 }
 

@@ -20,9 +20,9 @@ namespace Airlines.Services.Adaptor
             session3 = new Session3Entities();
         }
 
-        public BookFlightDto GetBookFlightDto(int[] id,string cabintype)
+        public BookFlightDto GetBookFlightDto(List<int> id,string cabintype)
         {
-            if (id.Length != 0)
+            if (id.Count != 0)
             {
                 decimal multiple = 1;
                 switch (cabintype)
@@ -41,21 +41,24 @@ namespace Airlines.Services.Adaptor
                 string flightnumber = "";
                 decimal price = 0;
                 int first_id = id[0];
-                int last_id = id[id.Length - 1];
+                int last_id = id[id.Count - 1];
+                BookFlightDto bookFlightDto = new BookFlightDto();
+                bookFlightDto.ScheduleID = "";
                 foreach (int i in id)
                 {
                     flightnumber += $"[{session3.Schedules.SingleOrDefault(s => s.ID == i).FlightNumber}] - ";
                     price += Math.Ceiling(session3.Schedules.SingleOrDefault(s => s.ID == i).EconomyPrice * multiple);
+                    bookFlightDto.ScheduleID += $"{i},";
                 }
                 flightnumber = flightnumber.Remove(flightnumber.Length - 3);
-                BookFlightDto bookFlightDto = new BookFlightDto();
+                bookFlightDto.ScheduleID = bookFlightDto.ScheduleID.Remove(bookFlightDto.ScheduleID.Length - 2);
                 bookFlightDto.From = session3.Schedules.SingleOrDefault(s => s.ID == first_id).Route.Airport.IATACode;
                 bookFlightDto.To = session3.Schedules.SingleOrDefault(s => s.ID == last_id).Route.Airport1.IATACode;
                 bookFlightDto.Date = session3.Schedules.SingleOrDefault(s => s.ID == first_id).Date.ToString("dd/MM/yyyy");
                 bookFlightDto.Time = session3.Schedules.SingleOrDefault(s => s.ID == first_id).Time.ToString();
                 bookFlightDto.FlightNumber = flightnumber;
                 bookFlightDto.CabinPrice = price.ToString("C1",CultureInfo.CurrentCulture);
-                bookFlightDto.NumberOfStops = id.Length - 1;
+                bookFlightDto.NumberOfStops = id.Count - 1;
 
                 return bookFlightDto;
             }
@@ -63,17 +66,15 @@ namespace Airlines.Services.Adaptor
                 return null;
         }
 
-        public List<BookFlightDto> GetListBookFlightDto(List<int[]> routevalue, string cabintype)
+        public List<BookFlightDto> GetListBookFlightDto(List<List<int>> routevalues, string cabintype)
         {
             BookFlightDto temp = new BookFlightDto();
             try
             {
                 List<BookFlightDto> result = new List<BookFlightDto>();
-                for (int i = 0; i < routevalue.Count; i++)
+                foreach(List<int> routevalue in routevalues)
                 {
-                    temp = GetBookFlightDto(routevalue[i], cabintype);
-                    if (!result.Any(r=>r.Date == temp.Date && r.FlightNumber.Equals(temp.FlightNumber)))
-                        result.Add(temp);
+                    result.Add(GetBookFlightDto(routevalue, cabintype));
                 }
                 return result.OrderBy(r=>r.Date).ToList();
             }

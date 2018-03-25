@@ -23,6 +23,7 @@ namespace Airlines.FormApplication
 
         async Task LoadCombobox()
         {
+            TaskRunning();
             List<string> result = await Program.Instance.Controller.AirportList();
             foreach(string s in result)
             {
@@ -31,6 +32,7 @@ namespace Airlines.FormApplication
             }
             fromCbx.SelectedIndex = 0;
             toCbx.SelectedIndex = 1;
+            TaskEnd();
         }
 
         async Task RefreshGridView()
@@ -54,6 +56,8 @@ namespace Airlines.FormApplication
                     cabintypeCbx.SelectedItem.ToString()
                     );
             }
+            //outboundflightDgv.Columns[7].Visible = false;
+            //returnflightDgv.Columns[7].Visible = false;
         }
 
         void LoadGridView()
@@ -83,8 +87,57 @@ namespace Airlines.FormApplication
 
         private async void applyBtn_Click(object sender, EventArgs e)
         {
+            TaskRunning();
             await RefreshGridView();
             LoadGridView();
+            TaskEnd();
+        }
+
+        void TaskRunning()
+        {
+            statusLbl.Visible = true;
+            applyBtn.Enabled = false;
+            fromCbx.Enabled = false;
+            toCbx.Enabled = false;
+            cabintypeCbx.Enabled = false;
+            onewayRbt.Enabled = false;
+            returnRbt.Enabled = false;
+            outboundDtp.Enabled = false;
+            returnDtp.Enabled = false;
+            outboundChk.Enabled = false;
+            returnChk.Enabled = false;
+        }
+
+        void TaskEnd()
+        {
+            statusLbl.Visible = false;
+            applyBtn.Enabled = true;
+            fromCbx.Enabled = true;
+            toCbx.Enabled = true;
+            cabintypeCbx.Enabled = true;
+            onewayRbt.Enabled = true;
+            returnRbt.Enabled = true;
+            outboundDtp.Enabled = true;
+            returnDtp.Enabled = true;
+            outboundChk.Enabled = true;
+            returnChk.Enabled = true;
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void returnChk_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void outboundChk_CheckedChanged(object sender, EventArgs e)
+        {
+            TaskRunning();
+            LoadGridView();
+            TaskEnd();
         }
     }
 }

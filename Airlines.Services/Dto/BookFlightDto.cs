@@ -38,5 +38,8 @@ namespace Airlines.Services.Dto
         [DataMember(Name = "numberofstops", Order = 6)]
         [DisplayName("Number of stops")]
         public int NumberOfStops { get; set; }
+
+        [DataMember(Name = "scheduleid", Order = 7)]
+        public string ScheduleID { get; set; }
     }
 }

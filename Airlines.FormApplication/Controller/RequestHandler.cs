@@ -22,12 +22,12 @@ namespace Airlines.FormApplication.Controller
             return response.Data;
         }
 
-        public async Task<T> SubmitData(Method method,object _object)
+        public async Task<T> SubmitData(Method method,object @object)
         {
             client = new RestClient(Url);
             request = new RestRequest(method);
             request.RequestFormat = DataFormat.Json;
-            request.AddBody(_object);
+            request.AddBody(@object);
             IRestResponse<T> response =
                 await client.ExecuteTaskAsync<T>(request);
             return response.Data;

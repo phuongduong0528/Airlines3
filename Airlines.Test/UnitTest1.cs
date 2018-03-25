@@ -15,13 +15,13 @@ namespace Airlines.Test
         [TestMethod]
         public void TestMethod1()
         {
-            BookFlightManager bookFlightManager = new BookFlightManager();
+            FindRoute findRoute = new FindRoute();
             
-            List<int[]> list1 = bookFlightManager.FindFlight("AUH", "CAI", new DateTime(2017, 10, 7));
-            List<int[]> list2 = bookFlightManager.FindFlight("AUH", "CAI", new DateTime(2017, 10, 8));
+            var x = findRoute.GetResultPaths(6, 5, new DateTime(2017, 10, 4), new DateTime(2017, 10, 10));
 
-            List<int[]> list3 = list1.Union(list2).ToList();
-            var x = list3.Distinct();
+            //string x = "3.23.2018 06:00:00";
+            //var y = DateTime.ParseExact(x, "M.d.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            Assert.AreEqual(1, 1);
         }
     }
 }

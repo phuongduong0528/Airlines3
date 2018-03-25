@@ -9,232 +9,258 @@ namespace Airlines.Business.Manager
 {
     public class FindRoute
     {
-        private Session3Entities session3 = new Session3Entities();
-        private int totalnode;           //TOTAL NUMBER OF NODE
-        private DateTime Start_Date { get; set; }
-        private List<int> current_path;
-        private string one_result_string;
-        private List<int> one_result_id;
-        private List<string> ResultString { get; }
-        private List<int[]> ResultID { get; }
+        private Session3Entities _sessionDbContext = new Session3Entities();
+        private int _totalNodes;                  //TOTAL NUMBER OF NODE
+        private DateTime _searchStartTime;            // SEARCH START DATE
+        private DateTime _searchEndTime;        // SEARCH END DATE
+        private List<int> _currentPath;         //LIST OF CHECKED PATH
+        private List<int> _tempResultPath;        //SAVE CORRECT PATH. Temporary path. A path is a list of airport ids.
+        private List<List<int>> _resultPaths;       //A list of result paths. Each path is a list of airport ids.
 
         //MAIN
-        private List<DateTime>[,] STime;
-        private List<DateTime>[,] FTime;
-        private int[] name;
-        private int[] trace;
-        private DateTime[,] trace_date;
-        private DateTime[,] trace_sdate;
-        private bool[] path;
+        private List<DateTime>[,] _startTimes;        //STime[i,j]                ->    LIST OF START TIME BETWEEN i, j (USE TO GET SCHEDULE ID)
+        private List<DateTime>[,] _finishTimes;        //FTime[i,j]                ->    LIST OF FINISH TIME BETWEEN i, j
+        private int[] _airportIds;                     //name[i] = j               ->    j IS THE AIRPORT ID
+        private int[] trace;                    //trace[i] = j              ->    THE NODE BEFORE i IS j
+        private List<DateTime>[,] traceFinishTimes;        //trace_fdate[i,j]          ->    THE FINISH TIME OF THE ROUTE BEFORE ROUTE i,j 
+        private List<DateTime>[,] traceStartTimes;        //trace_sdate[i,j]          ->    THE START TIME OF THE ROUTE BEFORE ROUTE i,j 
+        private bool[] path;                    //path[i] = (true or false) ->    i IS VISITED OR NOT
 
 
         public FindRoute()
         {
-            session3 = new Session3Entities();
-            totalnode = session3.Airports.Count();
-            current_path = new List<int>();
-            one_result_string = "";
-            one_result_id = new List<int>();
-            ResultString = new List<string>();
-            ResultID = new List<int[]>();
-            trace = new int[totalnode];
-            trace_date = new DateTime[totalnode, totalnode];
-            trace_sdate = new DateTime[totalnode,totalnode];
-            path = new bool[totalnode];
+            _sessionDbContext = new Session3Entities();
+            _totalNodes = _sessionDbContext.Airports.Count();
+            _currentPath = new List<int>();
+            _tempResultPath = new List<int>();
+            _resultPaths = new List<List<int>>();
+            trace = new int[_totalNodes];
+            traceFinishTimes = new List<DateTime>[_totalNodes, _totalNodes];
+            traceStartTimes = new List<DateTime>[_totalNodes,_totalNodes];
+
+            for (int i = 0; i < _totalNodes; i++)
+            {
+                for (int j = 0; j < _totalNodes; j++)
+                {
+                    traceFinishTimes[i, j] = new List<DateTime>();
+                    traceStartTimes[i, j] = new List<DateTime>();
+                }
+            }
+            path = new bool[_totalNodes];
         }
 
         #region Helper
-        bool Is_Connected(int id1,int id2)
+        bool IsConnected(int airportIdDept, int airportIdArr)
         {
-            int i = session3.Routes.Where(r => r.Airport.ID == id1
-                                        && r.Airport1.ID == id2).Count();
-            if (i > 0)
-                return true;
-            return false;
+            int routeCount = _sessionDbContext.Routes.Where(
+                r => r.Airport.ID == airportIdDept
+                && r.Airport1.ID == airportIdArr
+            ).Count();
+
+            return routeCount > 0;
         }
 
-        List<DateTime> GetListStart(int id1,int id2)
+        List<DateTime> GetListStartTimeBetweenTwoAirports(int airportIdDept, int airportIdArr)
         {
-            List<DateTime> result = new List<DateTime>();
-            foreach (Schedule s in
-                session3.Schedules.Where(s => s.Route.Airport.ID == id1
-                && s.Route.Airport1.ID == id2))
+            List<DateTime> startTimes = new List<DateTime>();
+            foreach (Schedule schedule in
+                _sessionDbContext.Schedules.Where(
+                    s => s.Route.Airport.ID == airportIdDept
+                    && s.Route.Airport1.ID == airportIdArr))
             {
-                DateTime start = new DateTime(
-                    s.Date.Year,
-                    s.Date.Month,
-                    s.Date.Day,
-                    s.Time.Hours,
-                    s.Time.Minutes,
-                    s.Time.Seconds);
-                result.Add(start);
+                DateTime startTime = new DateTime(
+                    schedule.Date.Year,
+                    schedule.Date.Month,
+                    schedule.Date.Day,
+                    schedule.Time.Hours,
+                    schedule.Time.Minutes,
+                    schedule.Time.Seconds);
+                startTimes.Add(startTime);
             }
-            return result;
+            return startTimes;
         }
 
-        List<DateTime> GetListFinish(int id1, int id2)
+        List<DateTime> GetListFinishTimeBetweenTwoAirports(int airportIdDept, int airportIdArr)
         {
-            List<DateTime> result = new List<DateTime>();
-            foreach (Schedule s in
-                session3.Schedules.Where(s => s.Route.Airport.ID == id1
-                && s.Route.Airport1.ID == id2))
+            List<DateTime> finishTimes = new List<DateTime>();
+            foreach (Schedule schedule in
+                _sessionDbContext.Schedules.Where(
+                    s => s.Route.Airport.ID == airportIdDept
+                    && s.Route.Airport1.ID == airportIdArr))
             {
-                DateTime finish = new DateTime(
-                    s.Date.Year,
-                    s.Date.Month,
-                    s.Date.Day,
-                    s.Time.Hours,
-                    s.Time.Minutes,
-                    s.Time.Seconds).Add(new TimeSpan(0, s.Route.FlightTime, 0));
-                result.Add(finish);
+                DateTime finishTime = new DateTime(
+                    schedule.Date.Year,
+                    schedule.Date.Month,
+                    schedule.Date.Day,
+                    schedule.Time.Hours,
+                    schedule.Time.Minutes,
+                    schedule.Time.Seconds).Add(new TimeSpan(0, schedule.Route.FlightTime, 0));
+                finishTimes.Add(finishTime);
             }
-            return result;
+            return finishTimes;
         }
 
-        string GetFlightNumber(int from,int to,DateTime time)
+        List<int> GetScheduleIds(int airportIdDept, int airportIdArr, DateTime startTime)
         {
-            return session3.Schedules.FirstOrDefault(s => s.Route.Airport.ID == from &&
-                                                          s.Route.Airport1.ID == to &&
-                                                          s.Date.Equals(time.Date) &&
-                                                          s.Time.Equals(time.TimeOfDay)).FlightNumber;
-        }
-
-        int GetScheduleId(int from, int to, DateTime time)
-        {
-            return session3.Schedules.FirstOrDefault(s => s.Route.Airport.ID == from &&
-                                                          s.Route.Airport1.ID == to &&
-                                                          s.Date.Equals(time.Date) &&
-                                                          s.Time.Equals(time.TimeOfDay)).ID;
+            return _sessionDbContext.Schedules.Where(
+                s => s.Route.Airport.ID == airportIdDept &&
+                s.Route.Airport1.ID == airportIdArr &&
+                s.Date.Equals(startTime.Date) &&
+                s.Time.Equals(startTime.TimeOfDay)
+            ).Select(s => s.ID).ToList();
         }
         #endregion
 
-        public void Inputdata()
+        /// <summary>
+        /// Initial start times, finish times & airport Ids list.
+        /// </summary>
+        public void InitialData()
         {
-            STime = new List<DateTime>[totalnode, totalnode];
-            FTime = new List<DateTime>[totalnode, totalnode];
-            name = new int[totalnode];
+            _startTimes = new List<DateTime>[_totalNodes, _totalNodes];
+            _finishTimes = new List<DateTime>[_totalNodes, _totalNodes];
+            _airportIds = 
+                 _sessionDbContext.Airports.Select(a => a.ID).ToArray();
 
-            int counter = 0;
-            foreach (Airport a in session3.Airports)    //KHOI TAO MANG NAME
+            for (int i = 0; i < _totalNodes; i++)
             {
-                name[counter] = a.ID;
-                counter++;
-            }
-            counter = 0;
-
-            for (int i = 0; i < totalnode; i++)
-            {
-                for(int j = 0; j < totalnode; j++)
+                for (int j = 0; j < _totalNodes; j++)
                 {
-                    if (Is_Connected(name[i], name[j]))
+                    if (IsConnected(_airportIds[i], _airportIds[j]))
                     {
-                        STime[i, j] = GetListStart(name[i], name[j]);
-                        FTime[i, j] = GetListFinish(name[i], name[j]);
+                        _startTimes[i, j] = GetListStartTimeBetweenTwoAirports(_airportIds[i], _airportIds[j]);
+                        _finishTimes[i, j] = GetListFinishTimeBetweenTwoAirports(_airportIds[i], _airportIds[j]);
                     }
                 }
             }
         }
 
-        bool CheckPath(int i,int j)
+        bool CheckPath(int i, int j)
         {
             int index;
-            if (trace[i] == -1 && STime[i, j] != null && !path[j])
+            if (trace[i] == -1 && _startTimes[i, j] != null && !path[j])
             {
                 trace[j] = i;
                 index = 0;
-                foreach (DateTime date in STime[i, j])
+                foreach (DateTime startTime in _startTimes[i, j])
                 {
-                    if (date >= Start_Date)
+                    if (_searchStartTime <= startTime && startTime <= _searchEndTime)
                     {
-                        trace_sdate[i, j] = date;
-                        trace_date[i, j] = FTime[i, j][index];
+                        traceStartTimes[i, j].Add(startTime);
+                        traceFinishTimes[i, j].Add(_finishTimes[i, j][index]);
                         return true;
                     }
                     index++;
                 }
+
                 return false;
+                //if (traceStartTimes[i, j].Count > 0)
+                //{
+                //    return true;
+                //}
+
+                //return false;
             }
-            if (STime[i, j] != null && !path[j])
+
+            if (_startTimes[i, j] != null && !path[j])
             {
                 index = 0;
-                foreach (DateTime date in STime[i, j])
+                trace[j] = i;
+                foreach (DateTime startTime in _startTimes[i, j])
                 {
-                    if (trace_date[trace[i], i] < date && 
-                        trace_date[trace[i], i] != DateTime.MinValue)
+                    for (int traceIndex = 0; traceIndex < traceStartTimes[trace[i], i].Count; traceIndex++)
                     {
-                        trace[j] = i;
-                        trace_sdate[i, j] = date;
-                        trace_date[i,j] = FTime[i, j][index];
-                        return true;
+                        if (traceFinishTimes[trace[i], i][traceIndex] < startTime.AddHours(23).AddMinutes(59).AddSeconds(59) &&
+                            traceFinishTimes[trace[i], i][traceIndex] != DateTime.MinValue)
+                        {
+                            traceStartTimes[i, j].Add(startTime);
+                            traceFinishTimes[i, j].Add(_finishTimes[i, j][index]);
+                            return true;
+                        }
                     }
                     index++;
                 }
+
+                //if (traceStartTimes[i, j].Count > 0)
+                //{
+                //    return true;
+                //}
             }
+
             return false;
         }
 
-        public void FindFlightRoute(int checking,int finish_node)
+        public void FindFlightRoute(int checkingNode, int finishNode)
         {
-            if (!path[checking])
+            if (!path[checkingNode])
             {
-                if (checking == finish_node)
+                if (checkingNode == finishNode)
                 {
-                    current_path.Add(checking);
-                    for (int i = 0; i < current_path.Count-1; i++)
-                    {
-                        one_result_string += $"[" +
-                            $"{GetFlightNumber(name[current_path[i]], name[current_path[i+1]], trace_sdate[current_path[i], current_path[i+1]])}" +
-                            $"] - ";
-                        one_result_id.Add(GetScheduleId(name[current_path[i]], name[current_path[i + 1]], trace_sdate[current_path[i], current_path[i + 1]]));
-                    }
-                    ResultString.Add(one_result_string.Remove(one_result_string.Length - 3));
-                    ResultID.Add(one_result_id.ToArray());
-                    one_result_string = "";
-                    one_result_id.Clear();
-                    path[checking] = false;
-                    current_path.RemoveAt(current_path.Count()-1);
+                    _currentPath.Add(checkingNode);
+                    SaveResult();
+                    path[checkingNode] = false;
+                    _currentPath.RemoveAt(_currentPath.Count() - 1);
                     return;
                 }
-                path[checking] = true;
-                current_path.Add(checking);
-                for (int i = 0; i < totalnode; i++)
+                path[checkingNode] = true;
+                _currentPath.Add(checkingNode);
+                for (int i = 0; i < _totalNodes; i++)
                 {
-                    if (CheckPath(checking,i))
+                    if (CheckPath(checkingNode,i))
                     {
-                        FindFlightRoute(i, finish_node);
+                        FindFlightRoute(i, finishNode);
                     }
                 }
-                path[checking] = false;
-                current_path.RemoveAt(current_path.Count()-1);
+                path[checkingNode] = false;
+                _currentPath.RemoveAt(_currentPath.Count()-1);
             }
+        }
+
+        private void SaveResult()
+        {
+            for (int i = 0; i < _currentPath.Count - 1; i++)
+            {
+                foreach (DateTime traceStartTime in traceStartTimes[_currentPath[i], _currentPath[i + 1]])
+                {
+                    _tempResultPath.AddRange(
+                        GetScheduleIds(
+                            _airportIds[_currentPath[i]], 
+                            _airportIds[_currentPath[i + 1]],
+                            traceStartTime
+                        )
+                    );
+                }
+
+            }
+            _resultPaths.Add(new List<int>(_tempResultPath));
+            _tempResultPath.Clear();
         }
 
         // ===================== GET RESULT ============================
-        public void CalculatePath(int from, int to, DateTime date)
+        public void CalculatePath(int airportFromId, int airportToId, DateTime searchStartDate, DateTime searchEndDate)
         {
-            int _from = 0;
-            int _to = 0;
-            Start_Date = date;
-            Inputdata();
-            for (int i = 0; i < name.Length; i++)
+            int _aiportFromIndex = 0;
+            int _airportToIndex = 0;
+            _searchStartTime = searchStartDate;
+            _searchEndTime = searchEndDate.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+            InitialData();
+
+            for (int i = 0; i < _airportIds.Length; i++)
             {
-                if (name[i] == from)
-                    _from = i;
-                if (name[i] == to)
-                    _to = i;
+                if (_airportIds[i] == airportFromId)
+                    _aiportFromIndex = i;
+                if (_airportIds[i] == airportToId)
+                    _airportToIndex = i;
             }
-            trace[_from] = -1;
-            FindFlightRoute(_from, _to);
+
+            trace[_aiportFromIndex] = -1;
+            FindFlightRoute(_aiportFromIndex, _airportToIndex);
         }
 
-        public List<string> GetResult_FN()
+        public List<List<int>> GetResultPaths(int airportFromId, int airportToId, DateTime searchStartDate, DateTime searchEndDate)
         {
-            return ResultString;
-        }
-
-        public List<int[]> GetResult_SID()
-        {
-            return ResultID;
+            CalculatePath(airportFromId, airportToId, searchStartDate, searchEndDate);
+            return _resultPaths;
         }
     }
 }
