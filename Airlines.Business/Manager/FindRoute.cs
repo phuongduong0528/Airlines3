@@ -18,13 +18,13 @@ namespace Airlines.Business.Manager
         private List<List<int>> _resultPaths;       //A list of result paths. Each path is a list of airport ids.
 
         //MAIN
-        private List<DateTime>[,] _startTimes;        //STime[i,j]                ->    LIST OF START TIME BETWEEN i, j (USE TO GET SCHEDULE ID)
-        private List<DateTime>[,] _finishTimes;        //FTime[i,j]                ->    LIST OF FINISH TIME BETWEEN i, j
-        private int[] _airportIds;                     //name[i] = j               ->    j IS THE AIRPORT ID
-        private int[] trace;                    //trace[i] = j              ->    THE NODE BEFORE i IS j
-        private List<DateTime>[,] traceFinishTimes;        //trace_fdate[i,j]          ->    THE FINISH TIME OF THE ROUTE BEFORE ROUTE i,j 
-        private List<DateTime>[,] traceStartTimes;        //trace_sdate[i,j]          ->    THE START TIME OF THE ROUTE BEFORE ROUTE i,j 
-        private bool[] path;                    //path[i] = (true or false) ->    i IS VISITED OR NOT
+        private List<DateTime>[,] _startTimes;        //STime[i,j]      ->    LIST OF START TIME BETWEEN i, j (USE TO GET SCHEDULE ID)
+        private List<DateTime>[,] _finishTimes;        //FTime[i,j]     ->    LIST OF FINISH TIME BETWEEN i, j
+        private int[] _airportIds;                     //name[i] = j    ->    j IS THE AIRPORT ID
+        private int[] trace;                    //trace[i] = j          ->    THE NODE BEFORE i IS j
+        private List<DateTime>[,] traceFinishTimes;        //trace_fdate[i,j]   ->    THE FINISH TIME OF THE ROUTE BEFORE ROUTE i,j 
+        private List<DateTime>[,] traceStartTimes;        //trace_sdate[i,j]    ->    THE START TIME OF THE ROUTE BEFORE ROUTE i,j 
+        private bool[] path;                    //path[i] = (true or false)     ->    i IS VISITED OR NOT
 
 
         public FindRoute()
@@ -137,7 +137,7 @@ namespace Airlines.Business.Manager
         bool CheckPath(int i, int j)
         {
             int index;
-            if (trace[i] == -1 && _startTimes[i, j] != null && !path[j])
+            if ((trace[i] == -1) && (_startTimes[i, j] != null) && !path[j])
             {
                 trace[j] = i;
                 index = 0;
@@ -147,21 +147,19 @@ namespace Airlines.Business.Manager
                     {
                         traceStartTimes[i, j].Add(startTime);
                         traceFinishTimes[i, j].Add(_finishTimes[i, j][index]);
-                        return true;
                     }
                     index++;
                 }
 
-                return false;
-                //if (traceStartTimes[i, j].Count > 0)
-                //{
-                //    return true;
-                //}
+                if (traceStartTimes[i, j].Count > 0)
+                {
+                    return true;
+                }
 
-                //return false;
+                return false;
             }
 
-            if (_startTimes[i, j] != null && !path[j])
+            if ((_startTimes[i, j] != null) && !path[j])
             {
                 index = 0;
                 trace[j] = i;
@@ -169,23 +167,20 @@ namespace Airlines.Business.Manager
                 {
                     for (int traceIndex = 0; traceIndex < traceStartTimes[trace[i], i].Count; traceIndex++)
                     {
-                        if (traceFinishTimes[trace[i], i][traceIndex] < startTime.AddHours(23).AddMinutes(59).AddSeconds(59) &&
+                        if (traceFinishTimes[trace[i], i][traceIndex] < startTime &&
                             traceFinishTimes[trace[i], i][traceIndex] != DateTime.MinValue)
                         {
                             traceStartTimes[i, j].Add(startTime);
                             traceFinishTimes[i, j].Add(_finishTimes[i, j][index]);
-                            return true;
                         }
                     }
                     index++;
                 }
-
-                //if (traceStartTimes[i, j].Count > 0)
-                //{
-                //    return true;
-                //}
+                if (traceStartTimes[i, j].Count > 0)
+                {
+                    return true;
+                }
             }
-
             return false;
         }
 
@@ -217,22 +212,60 @@ namespace Airlines.Business.Manager
 
         private void SaveResult()
         {
-            for (int i = 0; i < _currentPath.Count - 1; i++)
+            bool isContinuous = true;
+            DateTime previousDate;
+            int round = traceStartTimes[_currentPath[0], _currentPath[1]].Count;
+            for(int j = 0; j < round; j++)
             {
-                foreach (DateTime traceStartTime in traceStartTimes[_currentPath[i], _currentPath[i + 1]])
+                previousDate = traceStartTimes[_currentPath[0], _currentPath[1]][j];
+                _tempResultPath.AddRange(
+                                GetScheduleIds(
+                               _airportIds[_currentPath[0]],
+                               _airportIds[_currentPath[1]],
+                               previousDate));
+                for (int i = 1; i < _currentPath.Count - 1; i++)
                 {
-                    _tempResultPath.AddRange(
-                        GetScheduleIds(
-                            _airportIds[_currentPath[i]], 
-                            _airportIds[_currentPath[i + 1]],
-                            traceStartTime
-                        )
-                    );
+                    isContinuous = false;
+                    foreach (DateTime traceStartTime in traceStartTimes[_currentPath[i], _currentPath[i + 1]])
+                    {
+                        if (previousDate < traceStartTime)
+                        {
+                           _tempResultPath.AddRange(
+                                GetScheduleIds(
+                               _airportIds[_currentPath[i]],
+                               _airportIds[_currentPath[i + 1]],
+                               traceStartTime));
+                            previousDate = traceStartTime;
+                            isContinuous = true;
+                            break;
+                        }
+                    }
+                    if (!isContinuous)
+                        break;
                 }
-
+                if (isContinuous)
+                {
+                    _resultPaths.Add(new List<int>(_tempResultPath));
+                    _tempResultPath.Clear();
+                }
             }
-            _resultPaths.Add(new List<int>(_tempResultPath));
-            _tempResultPath.Clear();
+
+            //for (int i = 0; i < _currentPath.Count - 1; i++)
+            //{
+            //    foreach (DateTime traceStartTime in traceStartTimes[_currentPath[i], _currentPath[i + 1]])
+            //    {
+            //        _tempResultPath.AddRange(
+            //        GetScheduleIds(
+            //            _airportIds[_currentPath[i]],
+            //            _airportIds[_currentPath[i + 1]],
+            //            traceStartTime
+            //            )
+            //        );
+            //    }
+
+            //}
+            //_resultPaths.Add(new List<int>(_tempResultPath));
+            //_tempResultPath.Clear();
         }
 
         // ===================== GET RESULT ============================

@@ -16,12 +16,15 @@ namespace Airlines.Test
         public void TestMethod1()
         {
             FindRoute findRoute = new FindRoute();
-            
-            var x = findRoute.GetResultPaths(6, 5, new DateTime(2017, 10, 4), new DateTime(2017, 10, 10));
+
+            var x = findRoute.GetResultPaths(7, 3, new DateTime(2017, 10, 4), new DateTime(2017, 10, 28));
+
+
+            findRoute = new FindRoute();
+            var y = findRoute.GetResultPaths(4, 2, new DateTime(2017, 10, 4), new DateTime(2017, 10, 28));
 
             //string x = "3.23.2018 06:00:00";
             //var y = DateTime.ParseExact(x, "M.d.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-            Assert.AreEqual(1, 1);
         }
     }
 }
